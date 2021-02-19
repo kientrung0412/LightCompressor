@@ -18,7 +18,7 @@ object Compressor {
     private const val MIN_BITRATE = 2000000
     private const val MIN_HEIGHT = 640.0
     private const val MIN_WIDTH = 360.0
-    private const val FRAME_RATE = 30
+    private const val FRAME_RATE = 24
     private const val I_FRAME_INTERVAL = 2
     private const val MIME_TYPE = "video/avc"
     private const val MEDIACODEC_TIMEOUT_DEFAULT = 5000L
@@ -101,7 +101,8 @@ object Compressor {
         var (newWidth, newHeight) = generateWidthAndHeight(
             width,
             height,
-            keepOriginalResolution
+            keepOriginalResolution,
+            quality
         )
 
         //Handle rotation values and swapping height and width if needed
@@ -452,6 +453,8 @@ object Compressor {
             VideoQuality.MEDIUM -> (bitrate * 0.2).roundToInt()
             VideoQuality.HIGH -> (bitrate * 0.3).roundToInt()
             VideoQuality.VERY_HIGH -> (bitrate * 0.5).roundToInt()
+            VideoQuality.HD -> 2500000
+            VideoQuality.FULL_HD -> 2500000
         }
     }
 
@@ -465,6 +468,7 @@ object Compressor {
         width: Double,
         height: Double,
         keepOriginalResolution: Boolean,
+        quality: VideoQuality,
     ): Pair<Int, Int> {
 
         if (keepOriginalResolution) {
@@ -475,26 +479,66 @@ object Compressor {
         val newHeight: Int
 
         when {
-            width >= 1920 || height >= 1920 -> {
-                newWidth = (((width * 0.5) / 16).roundToInt() * 16)
-                newHeight = (((height * 0.5) / 16f).roundToInt() * 16)
+            VideoQuality.HD == quality -> {
+                when {
+                    width >= 1280 -> {
+                        val ratio: Double = 1280 / width
+                        newWidth = 1280;
+                        newHeight = (height * ratio).roundToInt()
+                    }
+                    height >= 1280 -> {
+                        val ratio: Double = 1280 / height
+                        newHeight = 1280
+                        newWidth = (width * ratio).roundToInt()
+                    }
+                    else -> {
+                        newWidth = width.roundToInt()
+                        newHeight = height.roundToInt()
+                    }
+                }
             }
-            width >= 1280 || height >= 1280 -> {
-                newWidth = (((width * 0.75) / 16).roundToInt() * 16)
-                newHeight = (((height * 0.75) / 16).roundToInt() * 16)
-            }
-            width >= 960 || height >= 960 -> {
-                if (width > height) {
-                    newWidth = (((MIN_HEIGHT * 0.95) / 16).roundToInt() * 16)
-                    newHeight = (((MIN_WIDTH * 0.95) / 16).roundToInt() * 16)
-                } else {
-                    newWidth = (((MIN_WIDTH * 0.95) / 16).roundToInt() * 16)
-                    newHeight = (((MIN_HEIGHT * 0.95) / 16).roundToInt() * 16)
+            VideoQuality.FULL_HD == quality -> {
+                when {
+                    width >= 1920 -> {
+                        val ratio: Double = 1920 / width
+                        newWidth = 1920;
+                        newHeight = (height * ratio).roundToInt()
+                    }
+                    height >= 1920 -> {
+                        val ratio: Double = 1920 / height
+                        newHeight = 1920
+                        newWidth = (width * ratio).roundToInt()
+                    }
+                    else -> {
+                        newWidth = width.roundToInt()
+                        newHeight = height.roundToInt()
+                    }
                 }
             }
             else -> {
-                newWidth = (((width * 0.9) / 16).roundToInt() * 16)
-                newHeight = (((height * 0.9) / 16).roundToInt() * 16)
+                when {
+                    width >= 1920 || height >= 1920 -> {
+                        newWidth = (((width * 0.5) / 16).roundToInt() * 16)
+                        newHeight = (((height * 0.5) / 16f).roundToInt() * 16)
+                    }
+                    width >= 1280 || height >= 1280 -> {
+                        newWidth = (((width * 0.75) / 16).roundToInt() * 16)
+                        newHeight = (((height * 0.75) / 16).roundToInt() * 16)
+                    }
+                    width >= 960 || height >= 960 -> {
+                        if (width > height) {
+                            newWidth = (((MIN_HEIGHT * 0.95) / 16).roundToInt() * 16)
+                            newHeight = (((MIN_WIDTH * 0.95) / 16).roundToInt() * 16)
+                        } else {
+                            newWidth = (((MIN_WIDTH * 0.95) / 16).roundToInt() * 16)
+                            newHeight = (((MIN_HEIGHT * 0.95) / 16).roundToInt() * 16)
+                        }
+                    }
+                    else -> {
+                        newWidth = (((width * 0.9) / 16).roundToInt() * 16)
+                        newHeight = (((height * 0.9) / 16).roundToInt() * 16)
+                    }
+                }
             }
         }
 

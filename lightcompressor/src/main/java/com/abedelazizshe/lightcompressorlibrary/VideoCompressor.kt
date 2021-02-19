@@ -5,7 +5,7 @@ import com.abedelazizshe.lightcompressorlibrary.Compressor.isRunning
 import kotlinx.coroutines.*
 
 enum class VideoQuality {
-    VERY_HIGH, HIGH, MEDIUM, LOW, VERY_LOW
+    VERY_HIGH, HIGH, MEDIUM, LOW, VERY_LOW, HD, FULL_HD
 }
 
 object VideoCompressor : CoroutineScope by MainScope() {
@@ -35,7 +35,7 @@ object VideoCompressor : CoroutineScope by MainScope() {
         srcPath: String,
         destPath: String,
         listener: CompressionListener,
-        quality: VideoQuality = VideoQuality.MEDIUM,
+        quality: VideoQuality = VideoQuality.HD,
         isMinBitRateEnabled: Boolean = true,
         keepOriginalResolution: Boolean = false,
     ) {
