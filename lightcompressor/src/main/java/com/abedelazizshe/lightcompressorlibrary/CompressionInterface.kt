@@ -12,16 +12,16 @@ interface CompressionListener {
     fun onStart()
 
     @MainThread
-    fun onSuccess()
+    fun onSuccess(filePath: String)
 
     @MainThread
-    fun onFailure(failureMessage: String)
+    fun onFailure(failureMessage: String, filePath: String)
 
     @WorkerThread
     fun onProgress(percent: Float)
 
     @WorkerThread
-    fun onCancelled()
+    fun onCancelled(filePath: String)
 }
 
 interface CompressionProgressListener {

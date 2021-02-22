@@ -32,20 +32,20 @@ object VideoCompressor : CoroutineScope by MainScope() {
     @JvmStatic
     @JvmOverloads
     fun start(
-        srcPath: String,
-        destPath: String,
-        listener: CompressionListener,
-        quality: VideoQuality = VideoQuality.HD,
-        isMinBitRateEnabled: Boolean = true,
-        keepOriginalResolution: Boolean = false,
+            srcPath: String,
+            destPath: String,
+            listener: CompressionListener,
+            quality: VideoQuality = VideoQuality.HD,
+            isMinBitRateEnabled: Boolean = true,
+            keepOriginalResolution: Boolean = false,
     ) {
         job = doVideoCompression(
-            srcPath,
-            destPath,
-            quality,
-            isMinBitRateEnabled,
-            keepOriginalResolution,
-            listener,
+                srcPath,
+                destPath,
+                quality,
+                isMinBitRateEnabled,
+                keepOriginalResolution,
+                listener,
         )
     }
 
@@ -59,56 +59,56 @@ object VideoCompressor : CoroutineScope by MainScope() {
     }
 
     private fun doVideoCompression(
-        srcPath: String,
-        destPath: String,
-        quality: VideoQuality,
-        isMinBitRateEnabled: Boolean,
-        keepOriginalResolution: Boolean,
-        listener: CompressionListener,
+            srcPath: String,
+            destPath: String,
+            quality: VideoQuality,
+            isMinBitRateEnabled: Boolean,
+            keepOriginalResolution: Boolean,
+            listener: CompressionListener,
     ) = launch {
         isRunning = true
         listener.onStart()
         val result = startCompression(
-            srcPath,
-            destPath,
-            quality,
-            isMinBitRateEnabled,
-            keepOriginalResolution,
-            listener,
+                srcPath,
+                destPath,
+                quality,
+                isMinBitRateEnabled,
+                keepOriginalResolution,
+                listener,
         )
 
         // Runs in Main(UI) Thread
         if (result.success) {
-            listener.onSuccess()
+            listener.onSuccess(destPath)
         } else {
-            listener.onFailure(result.failureMessage ?: "An error has occurred!")
+            listener.onFailure(result.failureMessage ?: "An error has occurred!", destPath)
         }
 
     }
 
     private suspend fun startCompression(
-        srcPath: String,
-        destPath: String,
-        quality: VideoQuality,
-        isMinBitRateEnabled: Boolean,
-        keepOriginalResolution: Boolean,
-        listener: CompressionListener,
+            srcPath: String,
+            destPath: String,
+            quality: VideoQuality,
+            isMinBitRateEnabled: Boolean,
+            keepOriginalResolution: Boolean,
+            listener: CompressionListener,
     ): Result = withContext(Dispatchers.IO) {
         return@withContext compressVideo(
-            srcPath,
-            destPath,
-            quality,
-            isMinBitRateEnabled,
-            keepOriginalResolution,
-            object : CompressionProgressListener {
-                override fun onProgressChanged(percent: Float) {
-                    listener.onProgress(percent)
-                }
+                srcPath,
+                destPath,
+                quality,
+                isMinBitRateEnabled,
+                keepOriginalResolution,
+                object : CompressionProgressListener {
+                    override fun onProgressChanged(percent: Float) {
+                        listener.onProgress(percent)
+                    }
 
-                override fun onProgressCancelled() {
-                    listener.onCancelled()
-                }
-            },
+                    override fun onProgressCancelled() {
+                        listener.onCancelled(destPath)
+                    }
+                },
         )
     }
 }
