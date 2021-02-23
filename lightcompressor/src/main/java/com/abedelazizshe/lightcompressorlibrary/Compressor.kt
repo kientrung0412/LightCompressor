@@ -1,7 +1,6 @@
 package com.abedelazizshe.lightcompressorlibrary
 
 import android.media.*
-import android.media.MediaCodecList.REGULAR_CODECS
 import android.os.Build
 import android.util.Log
 import java.io.File
@@ -21,7 +20,7 @@ object Compressor {
     private const val FRAME_RATE = 24
     private const val I_FRAME_INTERVAL = 2
     private const val MIME_TYPE = "video/avc"
-    private const val MEDIACODEC_TIMEOUT_DEFAULT = 5000L
+    private const val MEDIACODEC_TIMEOUT_DEFAULT = 100L
 
     private const val INVALID_BITRATE =
         "The provided bitrate is smaller than what is needed for compression " +
@@ -166,10 +165,11 @@ object Compressor {
 
                 var decoder: MediaCodec? = null
 
-                val encoderName = MediaCodecList(REGULAR_CODECS).findEncoderForFormat(outputFormat)
-
-                val encoder: MediaCodec = MediaCodec.createByCodecName(encoderName)
-                Log.i("encoderName", encoder.name)
+                // This seems to cause an issue with certain phones
+                //val encoderName = MediaCodecList(REGULAR_CODECS).findEncoderForFormat(outputFormat)
+                //  val encoder: MediaCodec = MediaCodec.createByCodecName(encoderName)
+                //Log.i("encoderName", encoder.name)
+                val encoder: MediaCodec = MediaCodec.createEncoderByType(MIME_TYPE)
 
                 var inputSurface: InputSurface? = null
                 var outputSurface: OutputSurface? = null
@@ -192,10 +192,14 @@ object Compressor {
 
                     outputSurface = OutputSurface()
 
-                    val decoderName =
-                        MediaCodecList(REGULAR_CODECS).findDecoderForFormat(inputFormat)
-                    decoder = MediaCodec.createByCodecName(decoderName)
-                    Log.i("decoderName", decoder.name)
+                    // This seems to cause an issue with certain phones
+                    // val decoderName =
+                    //     MediaCodecList(REGULAR_CODECS).findDecoderForFormat(inputFormat)
+                    // decoder = MediaCodec.createByCodecName(decoderName)
+                    // Log.i("decoderName", decoder.name)
+
+                    decoder =
+                        MediaCodec.createDecoderByType(inputFormat.getString(MediaFormat.KEY_MIME)!!)
 
                     decoder.configure(inputFormat, outputSurface.surface, null, 0)
                     //Move to executing state
