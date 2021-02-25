@@ -163,7 +163,7 @@ class MainActivity : AppCompatActivity() {
                                 progressBar.progress = 0
                             }
 
-                            override fun onSuccess() {
+                            override fun onSuccess(filePath: String) {
                                 val newSizeValue = desFile.length()
 
                                 newSize.text =
@@ -183,18 +183,18 @@ class MainActivity : AppCompatActivity() {
                                 }
                             }
 
-                            override fun onFailure(failureMessage: String) {
+                            override fun onFailure(failureMessage: String, filePath: String) {
                                 progress.text = failureMessage
                                 Log.wtf("failureMessage", failureMessage)
                             }
 
-                            override fun onCancelled() {
+                            override fun onCancelled(filePath: String) {
                                 Log.wtf("TAG", "compression has been cancelled")
                                 // make UI changes, cleanup, etc
                             }
                         },
-                        VideoQuality.MEDIUM,
-                        isMinBitRateEnabled = true,
+                        VideoQuality.HD,
+                        isMinBitRateEnabled = false,
                         keepOriginalResolution = false,
                     )
                 }

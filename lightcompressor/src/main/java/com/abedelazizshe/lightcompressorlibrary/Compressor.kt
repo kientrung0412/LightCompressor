@@ -180,7 +180,6 @@ object Compressor {
                     var outputDone = false
 
                     var videoTrackIndex = -5
-
                     encoder.configure(
                         outputFormat, null, null,
                         MediaCodec.CONFIGURE_FLAG_ENCODE
@@ -378,7 +377,8 @@ object Compressor {
                                         } catch (e: Exception) {
                                             Log.e(
                                                 "Compressor",
-                                                e.message ?: "Compression failed at swapping buffer"
+                                                e.message
+                                                    ?: "Compression failed at swapping buffer"
                                             )
                                         }
                                     }
@@ -420,10 +420,12 @@ object Compressor {
                     mediaMuxer.finishMovie()
                 } catch (e: Exception) {
                     printException(e)
+                    return Result(success = false, failureMessage = e.message)
                 }
 
             } catch (exception: Exception) {
                 printException(exception)
+                return Result(success = false, failureMessage = exception.message)
             }
 
             return Result(success = true, failureMessage = null)
@@ -479,8 +481,8 @@ object Compressor {
             return Pair(width.roundToInt(), height.roundToInt())
         }
 
-        val newWidth: Int
-        val newHeight: Int
+        var newWidth: Int
+        var newHeight: Int
 
         when {
             VideoQuality.HD == quality -> {
@@ -544,6 +546,16 @@ object Compressor {
                     }
                 }
             }
+        }
+
+        //Một số máy bị ngu
+        //Kích thước chia hết cho 2 mới nhận
+        //Ngu vl
+        if (newWidth % 2 != 0) {
+            newWidth -= 1
+        }
+        if (newHeight % 2 != 0) {
+            newHeight -= 1
         }
 
         return Pair(newWidth, newHeight)
